@@ -27,18 +27,9 @@ def print_naive(dataset):
     sys.stdout.write('\n')
     count = 0
     for row in dataset.rows:
-        key_yes = dataset.attributes['class'].values[0].value
-        key_no = dataset.attributes['class'].values[1].value
-        class_key_yes = 'class_'+key_yes
-        class_key_no = 'class_'+key_no
-        if class_key_yes in row:
-            sys.stdout.write(key_yes + ' ' + row['class'] + ' ' + str(row[class_key_yes]) + '\n')
-            if key_yes == row['class']:
-                count += 1
-        else:
-            sys.stdout.write(key_no + ' ' + row['class'] + ' ' + str(row[class_key_no]) + '\n')
-            if key_no == row['class']:
-                count += 1
+        sys.stdout.write(row['prediction'][1] + ' ' + row['class'] + ' ' + str(row['prediction'][0]) + '\n')
+        if row['prediction'][1] == row['class']:
+            count += 1
     sys.stdout.write('\n')
     sys.stdout.write(str(count))
 
@@ -97,11 +88,9 @@ def calculate_p_y_x(dataset_train, dataset_test):
                     p_x_y_no *= value.get_p_x_y_no()
                     break
         if p_x_y_yes > p_x_y_no:
-            key_new = 'class_' + param_yes
-            row[key_new] = p_x_y_yes/(p_x_y_yes + p_x_y_no)
+            row['prediction'] = [p_x_y_yes/(p_x_y_yes + p_x_y_no), param_yes]
         else:
-            key_new = 'class_' + param_no
-            row[key_new] = p_x_y_no/(p_x_y_yes + p_x_y_no)
+            row['prediction'] = [p_x_y_no/(p_x_y_yes + p_x_y_no), param_no]
 
 
 def calculate_p_x_y(dataset):
