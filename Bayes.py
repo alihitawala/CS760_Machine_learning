@@ -25,6 +25,7 @@ def print_naive(dataset):
             continue
         sys.stdout.write(attribute.name + ' class\n')
     sys.stdout.write('\n')
+    count = 0
     for row in dataset.rows:
         key_yes = dataset.attributes['class'].values[0].value
         key_no = dataset.attributes['class'].values[1].value
@@ -32,8 +33,14 @@ def print_naive(dataset):
         class_key_no = 'class_'+key_no
         if class_key_yes in row:
             sys.stdout.write(key_yes + ' ' + row['class'] + ' ' + str(row[class_key_yes]) + '\n')
+            if key_yes == row['class']:
+                count += 1
         else:
             sys.stdout.write(key_no + ' ' + row['class'] + ' ' + str(row[class_key_no]) + '\n')
+            if key_no == row['class']:
+                count += 1
+    sys.stdout.write('\n')
+    sys.stdout.write(str(count))
 
 
 def get_dataset_structure(filename):
