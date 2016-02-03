@@ -107,17 +107,28 @@ def calculate_p_x_x_y(dataset):
         attribute_x_1 = dataset.attribute_list[i]
         for j in range(i+1,len(dataset.attribute_list)):
             attribute_x_2 = dataset.attribute_list[j]
+            if attribute_x_1.name == 'class' or attribute_x_2.name == 'class':
+                continue
+            attribute_x_1.i_x_x_y[attribute_x_2.name] = 0.0
+            attribute_x_2.i_x_x_y[attribute_x_1.name] = 0.0
             for value_1 in attribute_x_1.values:
                 for value_2 in attribute_x_2.values:
-                    count_x_x_y = get_count_x_x_y(dataset, attribute_x_1.name, value_1, attribute_x_2.name,
-                                                  value_2, 'class', param_yes)
-                    p_x_x_y = count_x_x_y/count_total
+                    count_x_x_y_yes = get_count_x_x_y(dataset, attribute_x_1.name, value_1.value, attribute_x_2.name,
+                                                  value_2.value, 'class', param_yes) * 1.0
+                    count_x_x_y_no = get_count_x_x_y(dataset, attribute_x_1.name, value_1.value, attribute_x_2.name,
+                                                  value_2.value, 'class', param_no) * 1.0
+                    la_place_den = len(attribute_x_1.values) * len(attribute_x_2.values) * 2.0
+                    la_place_den_X_X = len(attribute_x_1.values) * len(attribute_x_2.values) * 1.0
+                    p_x_x_y_yes = (1 + count_x_x_y_yes)/(count_total + la_place_den)
+                    p_x_x_y_no = (1 + count_x_x_y_no)/(count_total + la_place_den)
+                    p_x_x_cond_y_yes = (1 + count_x_x_y_yes)/(la_place_den_X_X + count_param_yes)
+                    p_x_x_cond_y_no = (1 + count_x_x_y_no)/(la_place_den_X_X + count_param_no)
                     p_x1_y_yes = value_1.get_p_x_y_yes()
                     p_x1_y_no = value_1.get_p_x_y_no()
                     p_x2_y_yes = value_2.get_p_x_y_yes()
                     p_x2_y_no = value_2.get_p_x_y_no()
-                    attribute_x_1.i_x_x_y[attribute_x_2.name] += p_x_x_y * math.log(p_x_x_y/(p_x1_y_yes * p_x2_y_yes * p_y_yes))
-                    attribute_x_1.i_x_x_y[attribute_x_2.name] += p_x_x_y * math.log(p_x_x_y/(p_x1_y_no * p_x2_y_no * p_y_no))
+                    attribute_x_1.i_x_x_y[attribute_x_2.name] += p_x_x_y_yes * math.log(p_x_x_cond_y_yes/(p_x1_y_yes * p_x2_y_yes ), 2)
+                    attribute_x_1.i_x_x_y[attribute_x_2.name] += p_x_x_y_no * math.log(p_x_x_cond_y_no/(p_x1_y_no * p_x2_y_no), 2)
             attribute_x_2.i_x_x_y[attribute_x_1.name] = attribute_x_1.i_x_x_y[attribute_x_2.name]
 
 
