@@ -10,6 +10,7 @@ def main():
     filename_test = sys.argv[2]
     dataset = get_dataset_structure(filename_train)
     calculate_p_x_y(dataset)
+    calculate_p_x_x_y(dataset)
     test_data_naive_bayes(dataset, filename_test)
 
 
@@ -93,6 +94,41 @@ def calculate_p_y_x(dataset_train, dataset_test):
             row['prediction'] = [p_x_y_no/(p_x_y_yes + p_x_y_no), param_no]
 
 
+def calculate_p_x_x_y(dataset):
+    attribute_class = dataset.attributes['class']
+    param_yes = attribute_class.values[0].value
+    param_no = attribute_class.values[1].value
+    p_y_yes = attribute_class.values[0].get_p_x()
+    p_y_no = attribute_class.values[1].get_p_x()
+    count_param_yes = get_count(dataset, 'class', param_yes, param_yes) * 1.0
+    count_param_no = get_count(dataset, 'class', param_no, param_no) * 1.0
+    count_total = count_param_yes + count_param_no
+    for i in range(len(dataset.attribute_list)):
+        attribute_x_1 = dataset.attribute_list[i]
+        for j in range(i+1,len(dataset.attribute_list)):
+            attribute_x_2 = dataset.attribute_list[j]
+            for value_1 in attribute_x_1.values:
+                for value_2 in attribute_x_2.values:
+                    count_x_x_y = get_count_x_x_y(dataset, attribute_x_1.name, value_1, attribute_x_2.name,
+                                                  value_2, 'class', param_yes)
+                    p_x_x_y = count_x_x_y/count_total
+                    p_x1_y_yes = value_1.get_p_x_y_yes()
+                    p_x1_y_no = value_1.get_p_x_y_no()
+                    p_x2_y_yes = value_2.get_p_x_y_yes()
+                    p_x2_y_no = value_2.get_p_x_y_no()
+                    attribute_x_1.i_x_x_y[attribute_x_2.name] += p_x_x_y * math.log(p_x_x_y/(p_x1_y_yes * p_x2_y_yes * p_y_yes))
+                    attribute_x_1.i_x_x_y[attribute_x_2.name] += p_x_x_y * math.log(p_x_x_y/(p_x1_y_no * p_x2_y_no * p_y_no))
+            attribute_x_2.i_x_x_y[attribute_x_1.name] = attribute_x_1.i_x_x_y[attribute_x_2.name]
+
+
+def get_count_x_x_y(dataset, attribute_name_1, value_1, attribute_name_2, value_2, class_attribute, param) :
+    count = 0
+    for row in dataset.rows:
+        if row[attribute_name_1] == value_1 and row[attribute_name_2] == value_2 and row['class'] == param:
+            count += 1
+    return count
+
+
 def calculate_p_x_y(dataset):
     attribute_class = dataset.attributes['class']
     param_yes = attribute_class.values[0].value
@@ -146,6 +182,7 @@ class Attribute:
         self.values = values
         self.p_x_y_yes = 0
         self.p_x_y_no = 0
+        self.i_x_x_y = dict()
 
 
 class Value:
