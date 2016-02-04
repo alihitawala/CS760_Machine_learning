@@ -16,7 +16,70 @@ def main():
     calculate_p_x_y(dataset)
     calculate_p_x_x_y(dataset)
     get_graph_network(dataset)
+    generate_cpt(dataset)
     test_data_naive_bayes(dataset, filename_test)
+    test_data_bayes_net(dataset, filename_test)
+
+
+def test_data_bayes_net(dataset_train, filename):
+    dataset_test = get_dataset_structure(filename)
+    prediction_bayes_net(dataset_train, dataset_test)
+    print_naive(dataset_test)
+
+
+def prediction_bayes_net(dataset_train, dataset_test):
+    first_attribute = dataset_train.attribute_list[0]
+    for row in dataset_test.rows:
+        prediction = [0.0, 'dummy']
+        total_den = 0.0
+        for value in dataset_train.attributes['class'].values:
+            param = value.value
+            p = dataset_train.attributes['class'].cpt[param]
+            p *= first_attribute.cpt[row[first_attribute.name] + '_' + param]
+            for i in range(1, len(dataset_train.attribute_list) - 1):
+                attribute = dataset_train.attribute_list[i]
+                attribute_parent = dataset_train.attribute_list[i].connected_attribute[0]
+                key = row[attribute.name] + '_' + row[attribute_parent.name] + '_' + param
+                p *= attribute.cpt[key]
+            total_den += p
+            if p > prediction[0]:
+                prediction[0] = p
+                prediction[1] = param
+        row['prediction'] = [prediction[0]/total_den, prediction[1]]
+
+
+def generate_cpt(dataset):
+    attribute_class = dataset.attributes['class']
+    param_yes = attribute_class.values[0].value
+    param_no = attribute_class.values[1].value
+    attribute_class.cpt[param_yes] = attribute_class.values[0].get_p_x()
+    attribute_class.cpt[param_no] = attribute_class.values[1].get_p_x()
+    first_attribute = dataset.attribute_list[0]
+    for value in first_attribute.values:
+        key_yes = value.value + '_' + param_yes
+        key_no = value.value + '_' + param_no
+        first_attribute.cpt[key_yes] = value.get_p_x_y_yes()
+        first_attribute.cpt[key_no] = value.get_p_x_y_no()
+    for i in range(1, len(dataset.attribute_list)):
+        attribute_x_1 = dataset.attribute_list[i]
+        for attribute_x_2 in attribute_x_1.connected_attribute:
+            if attribute_x_1.name == 'class' or attribute_x_2.name == 'class':
+                continue
+            for value_1 in attribute_x_1.values:
+                for value_2 in attribute_x_2.values:
+                    count_x_x_y_yes = get_count_x_x_y(dataset, attribute_x_1.name, value_1.value, attribute_x_2.name,
+                                                  value_2.value, 'class', param_yes) * 1.0
+                    count_x_x_y_no = get_count_x_x_y(dataset, attribute_x_1.name, value_1.value, attribute_x_2.name,
+                                                  value_2.value, 'class', param_no) * 1.0
+                    count_x2_in_yes = get_count(dataset, attribute_x_2.name, value_2.value, param_yes) * 1.0
+                    count_x2_in_no = get_count(dataset, attribute_x_2.name, value_2.value, param_no) * 1.0
+                    la_place_den = len(attribute_x_1.values) * 1.0
+                    p_x_x_y_yes = (1 + count_x_x_y_yes)/(count_x2_in_yes + la_place_den)
+                    p_x_x_y_no = (1 + count_x_x_y_no)/(count_x2_in_no + la_place_den)
+                    key_yes = value_1.value + '_' + value_2.value + '_' + param_yes
+                    key_no = value_1.value + '_' + value_2.value + '_' + param_no
+                    attribute_x_1.cpt[key_yes] = p_x_x_y_yes
+                    attribute_x_1.cpt[key_no] = p_x_x_y_no
 
 
 def get_graph_network(dataset):
@@ -37,6 +100,31 @@ def get_graph_network(dataset):
             add_edges(dataset, q, edge.v, vertex_list)
             edge.u.connected_attribute.append(edge.v)
             edge.v.connected_attribute.append(edge.u)
+    parent_list = []
+    dfs_set_direction(dataset.attribute_list[0], parent_list)
+    dfs_print(dataset)
+
+
+#todo remove
+def dfs_print(dataset):
+    for attribute in dataset.attribute_list:
+        sys.stdout.write(attribute.name + " :: ")
+        for neighbour in attribute.connected_attribute:
+            sys.stdout.write(neighbour.name + " ")
+        sys.stdout.write("\n")
+
+
+def dfs_set_direction(attribute, parent_list):
+    parent_list.append(attribute.name)
+    for neighbour in attribute.connected_attribute:
+        if neighbour.name not in parent_list:
+            dfs_set_direction(neighbour, parent_list)
+    list_to_assign = []
+    for neighbour in attribute.connected_attribute:
+        if neighbour.name in parent_list:
+            list_to_assign.append(neighbour)
+    attribute.connected_attribute = list_to_assign
+    parent_list.remove(attribute.name)
 
 
 def add_edges(dataset, q, u, all_v):
@@ -50,7 +138,7 @@ def add_edges(dataset, q, u, all_v):
 
 def test_data_naive_bayes(dataset_train, filename):
     dataset_test = get_dataset_structure(filename)
-    calculate_p_y_x(dataset_train, dataset_test)
+    prediction_naive_bayes(dataset_train, dataset_test)
     print_naive(dataset_test)
 
 
@@ -102,7 +190,7 @@ def get_dataset_structure(filename):
     return dataset
 
 
-def calculate_p_y_x(dataset_train, dataset_test):
+def prediction_naive_bayes(dataset_train, dataset_test):
     attribute_class = dataset_train.attributes['class']
     param_yes = attribute_class.values[0].value
     param_no = attribute_class.values[1].value
@@ -132,8 +220,6 @@ def calculate_p_x_x_y(dataset):
     attribute_class = dataset.attributes['class']
     param_yes = attribute_class.values[0].value
     param_no = attribute_class.values[1].value
-    p_y_yes = attribute_class.values[0].get_p_x()
-    p_y_no = attribute_class.values[1].get_p_x()
     count_param_yes = get_count(dataset, 'class', param_yes, param_yes) * 1.0
     count_param_no = get_count(dataset, 'class', param_no, param_no) * 1.0
     count_total = count_param_yes + count_param_no
@@ -223,6 +309,7 @@ class Attribute:
         self.p_x_y_no = 0
         self.i_x_x_y = dict()
         self.connected_attribute = []
+        self.cpt = dict()
 
 
 class Value:
