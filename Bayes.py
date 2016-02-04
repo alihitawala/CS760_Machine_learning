@@ -3,6 +3,10 @@ __author__ = 'aliHitawala'
 
 import sys
 import math
+try:
+    import Queue as Q  # ver. < 3.0
+except ImportError:
+    import queue as Q
 
 
 def main():
@@ -11,7 +15,37 @@ def main():
     dataset = get_dataset_structure(filename_train)
     calculate_p_x_y(dataset)
     calculate_p_x_x_y(dataset)
+    get_graph_network(dataset)
     test_data_naive_bayes(dataset, filename_test)
+
+
+def get_graph_network(dataset):
+    q = Q.PriorityQueue()
+    # vertices_in = [dataset.attribute_list[0]]
+    vertex_list = [dataset.attribute_list[0].name]
+    total_attribute = len(dataset.attribute_list) - 1 # class attribute
+    add_edges(dataset, q, dataset.attribute_list[0], vertex_list)
+    while len(vertex_list) != total_attribute:
+        edge = q.get()
+        if edge.u.name not in vertex_list:
+            vertex_list.append(edge.u.name)
+            add_edges(dataset, q, edge.u, vertex_list)
+            edge.u.connected_attribute.append(edge.v)
+            edge.v.connected_attribute.append(edge.u)
+        elif edge.v.name not in vertex_list:
+            vertex_list.append(edge.v.name)
+            add_edges(dataset, q, edge.v, vertex_list)
+            edge.u.connected_attribute.append(edge.v)
+            edge.v.connected_attribute.append(edge.u)
+
+
+def add_edges(dataset, q, u, all_v):
+    for key in u.i_x_x_y:
+        if key not in all_v:
+            weight = u.i_x_x_y[key]
+            v = dataset.attributes[key]
+            edge = Edge(u, v, weight)
+            q.put(edge)
 
 
 def test_data_naive_bayes(dataset_train, filename):
@@ -174,12 +208,6 @@ def get_count(dataset, name, value, param):
     return count
 
 
-class Tuple:
-    def __init__(self, value, token):
-        self.value = value
-        self.token = token
-
-
 class Dataset:
     def __init__(self, attribute_list, attributes, rows):
         self.attribute_list = attribute_list
@@ -194,6 +222,7 @@ class Attribute:
         self.p_x_y_yes = 0
         self.p_x_y_no = 0
         self.i_x_x_y = dict()
+        self.connected_attribute = []
 
 
 class Value:
@@ -220,5 +249,15 @@ class Value:
 
     def get_p_x_y_no(self):
         return self.p_x_y_no
+
+
+class Edge:
+    def __init__(self, u, v, w):
+        self.u = u
+        self.v = v
+        self.weight = w
+
+    def __cmp__(self, other):
+        return cmp(other.weight, self.weight)
 
 main()
