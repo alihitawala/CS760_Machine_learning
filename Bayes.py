@@ -12,19 +12,22 @@ except ImportError:
 def main():
     filename_train = sys.argv[1]
     filename_test = sys.argv[2]
+    type = sys.argv[3]
     dataset = get_dataset_structure(filename_train)
     calculate_p_x_y(dataset)
-    calculate_p_x_x_y(dataset)
-    get_graph_network(dataset)
-    generate_cpt(dataset)
-    test_data_naive_bayes(dataset, filename_test)
-    test_data_bayes_net(dataset, filename_test)
+    if type == 't':
+        calculate_p_x_x_y(dataset)
+        get_graph_network(dataset)
+        generate_cpt(dataset)
+        test_data_bayes_net(dataset, filename_test)
+    elif type == 'n':
+        test_data_naive_bayes(dataset, filename_test)
 
 
 def test_data_bayes_net(dataset_train, filename):
     dataset_test = get_dataset_structure(filename)
     prediction_bayes_net(dataset_train, dataset_test)
-    print_naive(dataset_test)
+    print_generic(dataset_test, dataset_train)
 
 
 def prediction_bayes_net(dataset_train, dataset_test):
@@ -102,7 +105,6 @@ def get_graph_network(dataset):
             edge.v.connected_attribute.append(edge.u)
     parent_list = []
     dfs_set_direction(dataset.attribute_list[0], parent_list)
-    dfs_print(dataset)
 
 
 #todo remove
@@ -139,17 +141,19 @@ def add_edges(dataset, q, u, all_v):
 def test_data_naive_bayes(dataset_train, filename):
     dataset_test = get_dataset_structure(filename)
     prediction_naive_bayes(dataset_train, dataset_test)
-    print_naive(dataset_test)
+    print_generic(dataset_test, dataset_train)
 
 
-def print_naive(dataset):
-    for attribute in dataset.attribute_list:
+def print_generic(dataset_test, dataset_train):
+    for attribute in dataset_test.attribute_list:
         if attribute.name == 'class':
             continue
-        sys.stdout.write(attribute.name + ' class\n')
+        connected_attributes = dataset_train.attributes[attribute.name].connected_attribute
+        parent = str(' ' + connected_attributes[0].name) if len(connected_attributes) > 0 else ''
+        sys.stdout.write(attribute.name + parent + ' class\n')
     sys.stdout.write('\n')
     count = 0
-    for row in dataset.rows:
+    for row in dataset_test.rows:
         sys.stdout.write(row['prediction'][1] + ' ' + row['class'] + ' ' + str(row['prediction'][0]) + '\n')
         if row['prediction'][1] == row['class']:
             count += 1
