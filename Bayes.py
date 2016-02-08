@@ -86,25 +86,46 @@ def generate_cpt(dataset):
 
 
 def get_graph_network(dataset):
-    q = Q.PriorityQueue()
-    # vertices_in = [dataset.attribute_list[0]]
     vertex_list = [dataset.attribute_list[0].name]
     total_attribute = len(dataset.attribute_list) - 1 # class attribute
-    add_edges(dataset, q, dataset.attribute_list[0], vertex_list)
+    edges = get_edges(dataset, dataset.attribute_list[0], vertex_list)
     while len(vertex_list) != total_attribute:
-        edge = q.get()
-        if edge.u.name not in vertex_list:
-            vertex_list.append(edge.u.name)
-            add_edges(dataset, q, edge.u, vertex_list)
-            edge.u.connected_attribute.append(edge.v)
-            edge.v.connected_attribute.append(edge.u)
-        elif edge.v.name not in vertex_list:
-            vertex_list.append(edge.v.name)
-            add_edges(dataset, q, edge.v, vertex_list)
-            edge.u.connected_attribute.append(edge.v)
-            edge.v.connected_attribute.append(edge.u)
+        max_edge = Edge(None, None, 0.0)
+        for edge in edges:
+            if edge.v.name not in vertex_list:
+                if edge.weight > max_edge.weight :
+                    max_edge = edge
+                elif edge.weight == max_edge.weight:
+                    if attribute_priority(dataset, edge.u.name) < attribute_priority(dataset, max_edge.u.name) \
+                            or (attribute_priority(dataset, edge.u.name) == attribute_priority(dataset, max_edge.u.name)
+                                and attribute_priority(dataset, edge.v.name) < attribute_priority(dataset, max_edge.v.name)):
+                        max_edge = edge
+        max_edge.u.connected_attribute.append(max_edge.v)
+        max_edge.v.connected_attribute.append(max_edge.u)
+        vertex_list.append(max_edge.v.name)
+        edges.extend(get_edges(dataset, max_edge.v, vertex_list))
     parent_list = []
     dfs_set_direction(dataset.attribute_list[0], parent_list)
+
+
+def get_edges(dataset, u, vertex_list):
+    result = []
+    for key in u.i_x_x_y:
+        if key not in vertex_list:
+            weight = u.i_x_x_y[key]
+            v = dataset.attributes[key]
+            edge = Edge(u, v, weight)
+            result.append(edge)
+    return result
+
+
+def attribute_priority(dataset, name):
+    i = 0
+    for attribute in dataset.attribute_list:
+        i += 1
+        if attribute.name == name:
+            return i
+    return -1
 
 
 #todo remove
@@ -127,15 +148,6 @@ def dfs_set_direction(attribute, parent_list):
             list_to_assign.append(neighbour)
     attribute.connected_attribute = list_to_assign
     parent_list.remove(attribute.name)
-
-
-def add_edges(dataset, q, u, all_v):
-    for key in u.i_x_x_y:
-        if key not in all_v:
-            weight = u.i_x_x_y[key]
-            v = dataset.attributes[key]
-            edge = Edge(u, v, weight)
-            q.put(edge)
 
 
 def test_data_naive_bayes(dataset_train, filename):
