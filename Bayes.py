@@ -3,31 +3,64 @@ __author__ = 'aliHitawala'
 
 import sys
 import math
+import random, time
+import matplotlib.pyplot as plt
+import numpy as np
+
 try:
     import Queue as Q  # ver. < 3.0
 except ImportError:
     import queue as Q
 
-
-def main():
+def main(sample_num=None, _type = None):
     filename_train = sys.argv[1]
     filename_test = sys.argv[2]
-    type = sys.argv[3]
+    algorithm_used = sys.argv[3] if _type is None else _type
     dataset = get_dataset_structure(filename_train)
+    if sample_num is not None and sample_num < len(dataset.rows):
+        random_select(dataset, sample_num)
     calculate_p_x_y(dataset)
-    if type == 't':
+    if algorithm_used == 't':
         calculate_p_x_x_y(dataset)
         get_graph_network(dataset)
         generate_cpt(dataset)
-        test_data_bayes_net(dataset, filename_test)
-    elif type == 'n':
-        test_data_naive_bayes(dataset, filename_test)
+        return test_data_bayes_net(dataset, filename_test)
+    elif algorithm_used == 'n':
+        return test_data_naive_bayes(dataset, filename_test)
+
+
+def random_select(dataset, sample_num):
+    new_rows = random.sample(dataset.rows, sample_num)
+    dataset.rows = new_rows
+
+
+def draw_graph():
+    algorithms = ['n', 't']
+    plot_training_instances = [25, 50, 100]
+    results = []
+    for algo in algorithms:
+        for num_instances in plot_training_instances:
+            temp,total = 0.0,0.0
+            for i in range(4):
+                r = main(num_instances, algo)
+                temp += r[0]
+                total += r[1]
+            results.append(temp/total)
+        plt.plot(plot_training_instances, results, linestyle='--', marker='o', color='b')
+        plt.ylabel('Learning (Accuracy)')
+        plt.grid(True)
+        plt.xticks(np.arange(0, max(plot_training_instances)+10, 5.0))
+        plt.xlim(0, plot_training_instances[len(plot_training_instances) - 1] + 10)
+        plt.xlabel('Experience (Number of training instances)')
+        plt.title('Naive Bayes Classifier' if algo == 'n' else 'Tree Augmented Naive Bayes Classifier')
+        plt.show()
+        results = []
 
 
 def test_data_bayes_net(dataset_train, filename):
     dataset_test = get_dataset_structure(filename)
     prediction_bayes_net(dataset_train, dataset_test)
-    print_generic(dataset_test, dataset_train)
+    return [print_generic(dataset_test, dataset_train), len(dataset_test.rows)]
 
 
 def prediction_bayes_net(dataset_train, dataset_test):
@@ -153,7 +186,7 @@ def dfs_set_direction(attribute, parent_list):
 def test_data_naive_bayes(dataset_train, filename):
     dataset_test = get_dataset_structure(filename)
     prediction_naive_bayes(dataset_train, dataset_test)
-    print_generic(dataset_test, dataset_train)
+    return [print_generic(dataset_test, dataset_train), len(dataset_test.rows)]
 
 
 def print_generic(dataset_test, dataset_train):
@@ -171,6 +204,7 @@ def print_generic(dataset_test, dataset_train):
             count += 1
     sys.stdout.write('\n')
     sys.stdout.write(str(count))
+    return count
 
 
 def get_dataset_structure(filename):
