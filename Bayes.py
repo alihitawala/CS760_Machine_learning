@@ -204,6 +204,7 @@ def print_generic(dataset_test, dataset_train):
             count += 1
     sys.stdout.write('\n')
     sys.stdout.write(str(count))
+    sys.stdout.write('\n')
     return count
 
 
@@ -219,7 +220,7 @@ def get_dataset_structure(filename):
         if first_word == '%':
             continue
         if is_data:
-            values = [value.strip() for value in line.split(",")]
+            values = [value.strip().replace("'", "").replace('"', '') for value in line.split(",")]
             attribute_value_map = dict()
             i = 0
             for value in values:
@@ -228,9 +229,9 @@ def get_dataset_structure(filename):
                 i += 1
             rows.append(attribute_value_map)
         elif first_word == '@attribute':
-            attribute_name = word_list[1].replace("'", "")
+            attribute_name = word_list[1].replace("'", "").replace('"', '')
             values_embedded = line[line.find("{")+1:line.find("}")]
-            values = [Value(value.strip()) for value in values_embedded.split(",")]
+            values = [Value(value.strip().replace("'", "").replace('"', '')) for value in values_embedded.split(",")]
             attrib = Attribute(attribute_name, values)
             attribute_detail_map[attribute_name] = attrib
             attributes_list.append(attrib)
@@ -397,4 +398,4 @@ class Edge:
     def __cmp__(self, other):
         return cmp(other.weight, self.weight)
 
-main()
+draw_graph()
