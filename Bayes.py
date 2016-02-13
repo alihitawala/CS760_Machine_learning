@@ -45,9 +45,9 @@ def draw_graph():
                 r = main(num_instances, algo)
                 temp += r[0]
                 total += r[1]
-            results.append(temp/total)
+            results.append(temp*100.0/total)
         plt.plot(plot_training_instances, results, linestyle='--', marker='o', color='b')
-        plt.ylabel('Learning (Accuracy)')
+        plt.ylabel('Learning (Percentage Accuracy)')
         plt.grid(True)
         plt.xticks(np.arange(0, max(plot_training_instances)+10, 5.0))
         plt.xlim(0, plot_training_instances[len(plot_training_instances) - 1] + 10)
