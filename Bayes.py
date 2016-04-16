@@ -52,7 +52,7 @@ def draw_graph():
         plt.xticks(np.arange(0, max(plot_training_instances)+10, 5.0))
         plt.xlim(0, plot_training_instances[len(plot_training_instances) - 1] + 10)
         plt.xlabel('Experience (Number of training instances)')
-        plt.title('Naive Bayes Classifier' if algo == 'n' else 'Tree Augmented Naive Bayes Classifier')
+        plt.title('Learning curve for Naive Bayes Classifier' if algo == 'n' else 'Learning curve for Tree Augmented Naive Bayes Classifier')
         plt.show()
         results = []
 

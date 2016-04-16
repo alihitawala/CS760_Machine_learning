@@ -1,63 +1,75 @@
-lymphatics class
-block_of_affere class
-bl_of_lymph_c class
-bl_of_lymph_s class
-by_pass class
-extravasates class
-regeneration_of class
-early_uptake_in class
-lym_nodes_dimin class
-lym_nodes_enlar class
-changes_in_lym class
-defect_in_node class
-changes_in_node class
-changes_in_stru class
-special_forms class
-dislocation_of class
-exclusion_of_no class
-no_of_nodes_in class
+handicapped-infants class
+water-project-cost-sharing class
+adoption-of-the-budget-resolution class
+physician-fee-freeze class
+el-salvador-aid class
+religious-groups-in-schools class
+anti-satellite-test-ban class
+aid-to-nicaraguan-contras class
+mx-missile class
+immigration class
+synfuels-corporation-cutback class
+education-spending class
+superfund-right-to-sue class
+crime class
+duty-free-exports class
+export-administration-act-south-africa class
 
-malign_lymph malign_lymph 0.999905667857
-malign_lymph malign_lymph 0.964751256497
-malign_lymph malign_lymph 0.999100212504
-metastases malign_lymph 0.975031919657
-metastases malign_lymph 0.878788030231
-malign_lymph malign_lymph 0.94292423965
-malign_lymph malign_lymph 0.880399582454
-malign_lymph malign_lymph 0.999223101607
-malign_lymph malign_lymph 0.999338883578
-malign_lymph malign_lymph 0.992470205492
-metastases malign_lymph 0.997124812086
-metastases malign_lymph 0.881504905698
-malign_lymph malign_lymph 0.988837511922
-malign_lymph malign_lymph 0.998333381376
-malign_lymph malign_lymph 0.746749246102
-malign_lymph malign_lymph 0.995910009628
-metastases malign_lymph 0.974786684767
-malign_lymph malign_lymph 0.991660055042
-metastases metastases 0.932871375848
-metastases metastases 0.996866463371
-metastases metastases 0.996639192962
-metastases metastases 0.998526446393
-metastases metastases 0.99642196707
-metastases metastases 0.970916558831
-metastases metastases 0.997532198407
-metastases metastases 0.999455903435
-metastases metastases 0.99852785788
-metastases metastases 0.868691420426
-metastases metastases 0.997421737585
-metastases metastases 0.837352162093
-metastases metastases 0.974307807396
-metastases metastases 0.972739273777
-metastases metastases 0.931952598997
-metastases metastases 0.983571078569
-metastases metastases 0.996973138312
-metastases metastases 0.997252865072
-metastases metastases 0.918603323241
-metastases metastases 0.943388925344
-metastases metastases 0.990664265403
-metastases metastases 0.960654491087
-malign_lymph metastases 0.72938488669
-metastases metastases 0.929106187565
+republican republican 0.999999937093
+democrat democrat 0.999999967355
+democrat democrat 0.99984355777
+republican democrat 0.999958366432
+democrat democrat 0.99999627974
+republican democrat 0.999894000337
+republican democrat 0.986818861602
+democrat democrat 0.999523073066
+democrat democrat 0.999886830216
+republican democrat 0.999998023948
+democrat democrat 0.999999999961
+republican democrat 0.880794852275
+democrat democrat 0.999999977225
+republican republican 0.999997808185
+democrat republican 0.969716050401
+democrat democrat 0.985557069341
+democrat democrat 0.99999999316
+democrat democrat 0.999952122913
+republican democrat 0.779323634085
+democrat democrat 0.997770768097
+republican republican 0.999997760907
+republican republican 0.999986775973
+republican republican 0.99999980693
+democrat republican 0.933832780008
+republican republican 0.999999622152
+republican republican 0.999999724509
+republican republican 0.999999937093
+democrat democrat 0.824345975729
+republican democrat 0.999999728358
+democrat democrat 0.999998975829
+republican republican 0.999999955699
+republican republican 0.999999614278
+democrat democrat 0.999999995716
+republican republican 0.999999951518
+democrat republican 0.595941646944
+democrat democrat 0.999999997324
+democrat democrat 0.999996380517
+republican republican 0.999992569132
+democrat democrat 0.999999993205
+democrat democrat 0.999999928392
+democrat democrat 0.999999997324
+republican republican 0.890545299456
+democrat democrat 0.999973807623
+democrat democrat 0.999999998628
+democrat democrat 0.999999958627
+democrat democrat 0.999999993456
+democrat democrat 0.999999993642
+democrat democrat 0.999999999784
+republican republican 0.999983420908
+democrat democrat 0.999999227428
+democrat democrat 0.999999994173
+republican republican 0.999951638865
+democrat democrat 0.999999980271
+republican republican 0.999999614278
+republican republican 0.999999937093
+republican republican 0.999999968513
 
-36
+46
