@@ -398,4 +398,5 @@ class Edge:
     def __cmp__(self, other):
         return cmp(other.weight, self.weight)
 
-draw_graph()
+# draw_graph()
+main()
