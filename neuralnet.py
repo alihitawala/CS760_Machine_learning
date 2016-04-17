@@ -21,8 +21,8 @@ def calculate_output(dataset, row, attribute_weights, bias_weight):
     result = 0
     for attribute in dataset.attribute_list:
         if attribute.name.lower() != 'class' and attribute.name.lower() != ROW_INDEX_ATTRIBUTE:
-            result += float(row[attribute.name]) * attribute_weights[attribute.name]
-    result += bias_weight
+            result += float(row[attribute.name]) * attribute_weights[attribute.name] * 1.0
+    result += bias_weight * 1.0
     return sigmoid_func(result)
 
 
@@ -50,9 +50,9 @@ def update_attribute_weights(attribute_weights, row, o, y, n, bias_weight):
     for attribute_name in attribute_weights:
         w = attribute_weights[attribute_name]
         x = float(row[attribute_name])
-        new_w = n*delta_w*x + w
+        new_w = 1.0*n*delta_w*x + w*1.0
         attribute_weights[attribute_name] = new_w
-    return bias_weight + 1*n*delta_w
+    return bias_weight + 1.0*n*delta_w
 
 
 def merge(bucket_rows, exc):
@@ -83,8 +83,8 @@ def get_row_predictions(dataset, test_row, attribute_weights, bias_weight, fold_
 
 def print_prediction(test_row_predictions):
     test_row_predictions.sort(key=lambda x: x.index)
-    # for row in test_row_predictions:
-    #     print row.fold_num+1, row.actual_class, row.predicted_class, row.sigmoid_value, row.index
+    for row in test_row_predictions:
+        print row.fold_num+1, row.predicted_class, row.actual_class, "%.12f" % row.sigmoid_value
     return test_row_predictions
 
 
@@ -97,8 +97,8 @@ def neuralnet(dataset, num_folds, learning_rate, num_epoch):
         bias_weight = 0.1
         test_rows = bucket_rows[fold_num]
         train_rows = merge(bucket_rows, fold_num)
-        random.shuffle(train_rows)
         for epoch in range(num_epoch):
+            random.shuffle(train_rows)
             bias_weight = calculate_nn(dataset, train_rows, learning_rate, attribute_weights, bias_weight)
         for test_row in test_rows:
             test_row_predictions.append(get_row_predictions(dataset, test_row, attribute_weights, bias_weight, fold_num))
@@ -206,7 +206,8 @@ class StratifiedSampler:
             i = (i + 1) % self.num_buckets
         return bucket_of_rows
 
-def main(filename = 'sonar.arff', num_folds=10, lr=0.1, epochs=25):
+
+def main(filename = 'sonar.arff', num_folds=10, lr=0.1, epochs=50):
     filename_train = sys.argv[1] if filename is None else filename
     num_folds = int(sys.argv[2]) if num_folds is None else num_folds
     learning_rate = float(sys.argv[3]) if lr is None else lr
@@ -230,14 +231,14 @@ def plot_graphs():
             total_num += 1
         accuracy = float(1.0 * num_correct/total_num)
         print 'Epoch :: ' + str(epoch) + ' Accuracy :: ' + str(accuracy)
-        results.append(epoch)
+        results.append(accuracy)
     plt.plot(plot_epoch, results, linestyle='--', marker='o', color='b')
     plt.ylabel('Accuracy')
     plt.grid(True)
     plt.xticks(np.arange(0, max(plot_epoch)+10, 5.0))
     plt.xlim(0, plot_epoch[len(plot_epoch) - 1] + 10)
-    plt.xlabel('Number of Epoch')
-    plt.title('Accuracy v/s Epoch')
+    plt.xlabel('Number of Epochs')
+    plt.title('Accuracy v/s Number of Epochs')
     plt.show()
     results = []
     for fold in plot_folds:
@@ -250,15 +251,53 @@ def plot_graphs():
             total_num += 1
         accuracy = float(1.0 * num_correct/total_num)
         print 'Fold :: ' + str(fold) + ' Accuracy :: ' + str(accuracy)
-        results.append(fold)
+        results.append(accuracy)
     plt.plot(plot_folds, results, linestyle='--', marker='o', color='b')
     plt.ylabel('Accuracy')
     plt.grid(True)
-    plt.xticks(np.arange(0, max(plot_epoch)+10, 5.0))
-    plt.xlim(0, plot_epoch[len(plot_epoch) - 1] + 10)
-    plt.xlabel('Number of Epoch')
-    plt.title('Accuracy v/s Epoch')
+    plt.xticks(np.arange(0, max(plot_folds)+10, 5.0))
+    plt.xlim(0, plot_folds[len(plot_folds) - 1] + 10)
+    plt.xlabel('Number of Folds')
+    plt.title('Accuracy v/s Number of Folds')
     plt.show()
 
-# main()
-plot_graphs()
+
+def get_rows(rows, actual_label):
+    total = 0
+    for row in rows:
+        if row.actual_class == actual_label:
+            total += 1
+    return total
+
+
+def plot_roc():
+    rows = main(lr=0.1, epochs=50, num_folds=10)
+    rows.sort(key=lambda x: x.sigmoid_value, reverse=True)
+    positive_label = 'Mine'
+    negative_label = 'Rock'
+    positive_total = get_rows(rows, positive_label)
+    negative_total = get_rows(rows, negative_label)
+    true_positive = []
+    false_positive = []
+    positive_count = 0
+    negative_count = 0
+    for row in rows:
+        if row.actual_class == positive_label:
+            positive_count+=1
+        elif row.actual_class == negative_label:
+            negative_count+=1
+        true_positive.append(float(1.0*positive_count/positive_total))
+        false_positive.append(float(1.0*negative_count/negative_total))
+    plt.plot(false_positive, true_positive, linestyle='--', marker='.', color='b')
+    plt.ylabel('True Positive Rate')
+    plt.grid(True)
+    plt.xlabel('False Positive Rate')
+    plt.title('ROC Curve')
+    plt.show()
+
+main()
+# plot_graphs()
+
+
+
+# plot_roc()
