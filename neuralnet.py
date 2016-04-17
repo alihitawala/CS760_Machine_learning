@@ -13,17 +13,6 @@ except ImportError:
 
 ROW_INDEX_ATTRIBUTE = '__i__'
 
-
-def main():
-    filename_train = sys.argv[1]
-    num_folds = int(sys.argv[2])
-    learning_rate = float(sys.argv[3])
-    num_epochs = int(sys.argv[4])
-
-    dataset = get_dataset_structure(filename_train)
-    neuralnet(dataset, num_folds, learning_rate, num_epochs)
-
-
 def sigmoid_func(result):
     return 1.0 /(1+math.exp(-result))
 
@@ -94,8 +83,9 @@ def get_row_predictions(dataset, test_row, attribute_weights, bias_weight, fold_
 
 def print_prediction(test_row_predictions):
     test_row_predictions.sort(key=lambda x: x.index)
-    for row in test_row_predictions:
-        print row.fold_num+1, row.actual_class, row.predicted_class, row.sigmoid_value, row.index
+    # for row in test_row_predictions:
+    #     print row.fold_num+1, row.actual_class, row.predicted_class, row.sigmoid_value, row.index
+    return test_row_predictions
 
 
 def neuralnet(dataset, num_folds, learning_rate, num_epoch):
@@ -112,7 +102,7 @@ def neuralnet(dataset, num_folds, learning_rate, num_epoch):
             bias_weight = calculate_nn(dataset, train_rows, learning_rate, attribute_weights, bias_weight)
         for test_row in test_rows:
             test_row_predictions.append(get_row_predictions(dataset, test_row, attribute_weights, bias_weight, fold_num))
-    print_prediction(test_row_predictions)
+    return print_prediction(test_row_predictions)
 
 
 def get_dataset_structure(filename):
@@ -216,4 +206,59 @@ class StratifiedSampler:
             i = (i + 1) % self.num_buckets
         return bucket_of_rows
 
-main()
+def main(filename = 'sonar.arff', num_folds=10, lr=0.1, epochs=25):
+    filename_train = sys.argv[1] if filename is None else filename
+    num_folds = int(sys.argv[2]) if num_folds is None else num_folds
+    learning_rate = float(sys.argv[3]) if lr is None else lr
+    num_epochs = int(sys.argv[4]) if epochs is None else epochs
+
+    dataset = get_dataset_structure(filename_train)
+    return neuralnet(dataset, num_folds, learning_rate, num_epochs)
+
+
+def plot_graphs():
+    plot_epoch = [25, 50, 75, 100]
+    plot_folds = [5, 10, 15, 20, 25]
+    results = []
+    for epoch in plot_epoch:
+        rows = main(epochs=epoch)
+        num_correct = 0
+        total_num = 0
+        for row in rows:
+            if row.actual_class == row.predicted_class:
+                num_correct += 1
+            total_num += 1
+        accuracy = float(1.0 * num_correct/total_num)
+        print 'Epoch :: ' + str(epoch) + ' Accuracy :: ' + str(accuracy)
+        results.append(epoch)
+    plt.plot(plot_epoch, results, linestyle='--', marker='o', color='b')
+    plt.ylabel('Accuracy')
+    plt.grid(True)
+    plt.xticks(np.arange(0, max(plot_epoch)+10, 5.0))
+    plt.xlim(0, plot_epoch[len(plot_epoch) - 1] + 10)
+    plt.xlabel('Number of Epoch')
+    plt.title('Accuracy v/s Epoch')
+    plt.show()
+    results = []
+    for fold in plot_folds:
+        rows = main(num_folds=fold)
+        num_correct = 0
+        total_num = 0
+        for row in rows:
+            if row.actual_class == row.predicted_class:
+                num_correct += 1
+            total_num += 1
+        accuracy = float(1.0 * num_correct/total_num)
+        print 'Fold :: ' + str(fold) + ' Accuracy :: ' + str(accuracy)
+        results.append(fold)
+    plt.plot(plot_folds, results, linestyle='--', marker='o', color='b')
+    plt.ylabel('Accuracy')
+    plt.grid(True)
+    plt.xticks(np.arange(0, max(plot_epoch)+10, 5.0))
+    plt.xlim(0, plot_epoch[len(plot_epoch) - 1] + 10)
+    plt.xlabel('Number of Epoch')
+    plt.title('Accuracy v/s Epoch')
+    plt.show()
+
+# main()
+plot_graphs()
