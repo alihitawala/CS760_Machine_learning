@@ -207,7 +207,7 @@ class StratifiedSampler:
         return bucket_of_rows
 
 
-def main(filename = 'sonar.arff', num_folds=10, lr=0.1, epochs=50):
+def main(filename, num_folds, lr, epochs):
     filename_train = sys.argv[1] if filename is None else filename
     num_folds = int(sys.argv[2]) if num_folds is None else num_folds
     learning_rate = float(sys.argv[3]) if lr is None else lr
@@ -222,7 +222,7 @@ def plot_graphs():
     plot_folds = [5, 10, 15, 20, 25]
     results = []
     for epoch in plot_epoch:
-        rows = main(epochs=epoch)
+        rows = main('sonar.arff', 10, 0.1, epoch)
         num_correct = 0
         total_num = 0
         for row in rows:
@@ -242,7 +242,7 @@ def plot_graphs():
     plt.show()
     results = []
     for fold in plot_folds:
-        rows = main(num_folds=fold)
+        rows = main('sonar.arff', fold, 0.1, 50) # main(num_folds=fold)
         num_correct = 0
         total_num = 0
         for row in rows:
@@ -271,7 +271,7 @@ def get_rows(rows, actual_label):
 
 
 def plot_roc():
-    rows = main(lr=0.1, epochs=50, num_folds=10)
+    rows = main('sonar.arff', 10, 0.1, 50)
     rows.sort(key=lambda x: x.sigmoid_value, reverse=True)
     positive_label = 'Mine'
     negative_label = 'Rock'
@@ -295,7 +295,7 @@ def plot_roc():
     plt.title('ROC Curve')
     plt.show()
 
-main()
+main(None, None, None, None)
 # plot_graphs()
 
 
